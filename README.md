@@ -1,8 +1,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-# Python wrapper for jCompoundMapper molecular descriptors
+# Python wrapper for jCompoundMapper molecular fingerprints
 
-Python wrapper to ease the calculation of Signature molecular descriptors.
+Python wrapper to ease the calculation of jCompoundMApper molecular fingerprints.
 
 ## Installation
 
@@ -77,7 +77,7 @@ Parameters:
 - ***nbits  : Union[int, List[int]]***  
   Size of the fingerprints.
 - ***show_banner  : bool***  
-  Displays default notice about Signature descriptors.
+  Displays default notice about jCompoundMapper.
 - ***njobs  : int***  
   Maximum number of simultaneous processes.
 - ***chunksize  : int***  

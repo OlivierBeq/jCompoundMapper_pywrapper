@@ -1,6 +1,6 @@
 # -*- coding: utf-8
 
-"""Python wrapper for Signature descriptors"""
+"""Python wrapper for jCompoundMapper fingerprints"""
 
 from __future__ import annotations
 
@@ -108,7 +108,7 @@ class JCompoundMapper:
     _jarfile = os.path.abspath(os.path.join(__file__, os.pardir, 'jCompoundMapper', 'jCMapperCLI.jar'))  # Path to the JAR file
 
     def __init__(self, fingerprint: str = 'DFS', params: Optional[FpParamType] = None, verbose: bool = True):
-        """Instantiate a wrapper to calculate signature molecular descriptors.
+        """Instantiate a wrapper to calculate jCompoundMapper molecular fingerprints.
 
         :param verbose: Should details about the download of the executable be printed out
         """
@@ -132,7 +132,7 @@ class JCompoundMapper:
         :param show_banner: If True, show notice on fingerprint usage
         :param njobs: number of concurrent processes
         :param chunksize: number of molecules to be processed by a process; ignored if njobs is 1
-        :return: a pandas DataFrame containing all signature descriptor values
+        :return: a pandas DataFrame containing the fingerprint values
         """
         if self.fp_name == 'MACCS':
             nbits = 166
@@ -172,9 +172,9 @@ DOI: 10.1186/1758-2946-3-3
 """)
 
     def _prepare_command(self, mols: List[Chem.Mol], nbits: int = 1024) -> str:
-        """Create the ePaDEL command to be run to obtain molecular descriptors.
+        """Create the JCompoundMapper command to be run to obtain molecular fingerprints.
 
-        :param mols: molecules to obtained molecular descriptors of
+        :param mols: molecules to obtained molecular fingerprint of
         :param nbits: the size of the output fingerprints
         :return: The command to run.
         """
@@ -193,10 +193,10 @@ DOI: 10.1186/1758-2946-3-3
             for i, mol in enumerate(mols):
                 if mol is not None and isinstance(mol, Chem.Mol):
                     if mol.GetNumAtoms() > 999:
-                        raise ValueError('Cannot calculate descriptors for molecules with more than 999 atoms.')
+                        raise ValueError('Cannot calculate fingerprint for molecules with more than 999 atoms.')
                     # Does molecule lack hydrogen atoms?
                     if needsHs(mol):
-                        warnings.warn('Molecule lacks hydrogen atoms: this might affect the value of calculated descriptors')
+                        warnings.warn('Molecule lacks hydrogen atoms: this might affect the value of calculated fingerprint')
                     # 3D fingerprint
                     if '3D' in self.fp_name:
                         confs = list(mol.GetConformers())
@@ -253,9 +253,9 @@ DOI: 10.1186/1758-2946-3-3
     def _calculate(self, mols: List[Chem.Mol], nbits: int = 1024) -> pd.DataFrame:
         """Calculate JCompoundMapper fingerprints on one process.
 
-        :param mols: RDkit molecules for which PaDEL descriptors should be calculated.
+        :param mols: RDkit molecules for which JCompoundMapper fingerprints should be calculated.
         :param nbits: size of the fingerprint
-        :return: a pandas DataFrame containing signature descriptor values and the path to the temp dir to be removed
+        :return: a pandas DataFrame containing fingerprint values
         """
         # Prepare inputs
         command = self._prepare_command(mols, nbits)
@@ -277,14 +277,14 @@ DOI: 10.1186/1758-2946-3-3
         return results
 
     def _multiproc_calculate(self, mols: List[Chem.Mol], nbits: int = 1024) -> pd.DataFrame:
-        """Calculate PaDEL descriptors in thread-safe manner.
+        """Calculate jCompoundMapper fingerprints in thread-safe manner.
 
         :param mols: RDKit molecules for which jCompoundMapper fingerprints should be calculated
         :param nbits: size of the fingerprint
-        :return: a pandas DataFrame containing all PaDEL desciptor values and the path to the temp dir to be removed
+        :return: a pandas DataFrame containing the jCompoundMapper fingerprint values
         """
         # Copy self instance to make thread safe
-        padel = deepcopy(self)
+        jcm = deepcopy(self)
         # Run copy
-        result = padel.calculate(mols, nbits=nbits, show_banner=False, njobs=1)
+        result = jcm.calculate(mols, nbits=nbits, show_banner=False, njobs=1)
         return result

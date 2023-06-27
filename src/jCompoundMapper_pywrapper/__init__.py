@@ -1,6 +1,6 @@
 # -*- coding: utf-8
 
-"""Wrapper for Signature molecular descriptors"""
+"""Wrapper for jCompoundMapper molecular fingerprints"""
 
 from .jcompoundmapper import JCompoundMapper, AtomType, FpParamType, DEFAULT_FP_PARAMETERS
 
