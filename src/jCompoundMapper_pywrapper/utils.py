@@ -17,11 +17,11 @@ from jdk import install as _jre_install, _JRE_DIR
 
 def install_jre(version: int = 11):
     """Install a Java Runtime Environment."""
-    path = get_jre_in_dir(_JRE_DIR)
+    path = get_jre_in_dir(_JRE_DIR, version)
     if len(path) == 0:
         # Could not find JRE, install it
         _ = _jre_install(version, jre=True)
-        path = get_jre_in_dir(_JRE_DIR)
+        path = get_jre_in_dir(_JRE_DIR, version)
     return path
 
 
@@ -40,34 +40,37 @@ def make_temp_jre() -> Tuple[str, str]:
     # Make copy into dir
     shutil.copytree(install_path, os.path.join(outdir, 'jre'))
     # Find JRE in temp dir
-    path = get_jre_in_dir(outdir)
+    path = get_jre_in_dir(outdir, version=11)
     return outdir, path
 
 
-def get_jre_in_dir(dir: str):
+def get_jre_in_dir(dir: str, version: int):
     """Recursively search the directory to find a JRE."""
-    path = glob.glob(os.path.join(dir, '**', 'server',
+    paths = glob.glob(os.path.join(dir, '**', 'server',
                                   'jvm.dll' if sys.platform == "win32" else 'libjvm.so'
                                   ), recursive=True)
+    path = [path for path in paths if f'jre-{version}' in path]
     if len(path):
-        return path[0]
+        return os.path.abspath(path[0])
     return None
 
 
 def install_java(version: int = 11):
     """Install a Java Runtime Environment."""
-    path = get_java_in_dir(_JRE_DIR)
+    path = get_java_in_dir(_JRE_DIR, version)
     if path is None:
         # Could not find JRE, install it
         _ = _jre_install(version, jre=True)
-        path = get_java_in_dir(_JRE_DIR)
+        path = get_java_in_dir(_JRE_DIR, version=version)
     return path
 
-def get_java_in_dir(dir: str):
+
+def get_java_in_dir(dir: str, version: int):
     """Recursively search the directory to find a JRE."""
-    path = glob.glob(os.path.join(dir, '**', 'bin',
+    paths = glob.glob(os.path.join(dir, '**', 'bin',
                                   'java.exe' if sys.platform == "win32" else 'java'
                                   ), recursive=True)
+    path = [path for path in paths if f'jdk-{version}' in path]
     if len(path):
         return os.path.abspath(path[0])
     return None
@@ -84,6 +87,7 @@ def mktempfile(suffix: str = None) -> str:
     file = tempfile.mkstemp(suffix=suffix)
     os.close(file[0])
     return file[1]
+
 
 def needsHs(mol: Chem.Mol) -> bool:
     """Return if the molecule lacks hydrogen atoms or not.
