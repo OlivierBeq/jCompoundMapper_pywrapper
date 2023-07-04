@@ -8,7 +8,7 @@ from tests.constants import MOLECULES
 
 
 class TestFingerprints(unittest.TestCase):
-    """Tests for CDK_pywrapper molecular fingerprints."""
+    """Tests for jCompoundMapper_pywrapper molecular fingerprints."""
     def setUp(self) -> None:
         """Load molecules."""
         self.molecules = list(MOLECULES.values())
