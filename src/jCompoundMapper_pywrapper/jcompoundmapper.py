@@ -188,7 +188,7 @@ DOI: 10.1186/1758-2946-3-3
         try:
             block = BlockLogs()
             writer = Chem.SDWriter(self._tmp_sd)
-            # Ensure V2000 as CDK cannot properly process v3000
+            # Ensure V2000 as jCompoundMapper cannot properly process v3000
             writer.SetForceV3000(False)
             for i, mol in enumerate(mols):
                 if mol is not None and isinstance(mol, Chem.Mol):

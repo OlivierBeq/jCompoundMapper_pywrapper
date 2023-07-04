@@ -20,7 +20,7 @@ pip install jcompoundmapper-pywrapper
 ### Get started
 
 ```python
-from jCompoundMapper_pywrapper import JCompoundMapper
+from jcompoundmapper_pywrapper import JCompoundMapper
 from rdkit import Chem
 
 smiles_list = [
