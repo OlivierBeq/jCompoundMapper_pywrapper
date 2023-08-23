@@ -47,6 +47,13 @@ By default, 1024 bits fingerprints are generated, except for the 166 bits MACCS.
 ```python
 jcm = JCompoundMapper('ECFP')
 print(jcm.calculate(mols, 2048))
+
+# or
+
+from jCompoundMapper_pywrapper import Fingerprint
+
+jcm = JCompoundMapper(Fingerprint.DFS)
+print(jcm.calculate(mols, 2048))
 ```
 
 :warning: Molecules with 3D conformers must be provided to calculate 3D fingerprints (i.e. CATS3D, PHAP2POINT3D, PHAP3POINT3D and RAD3D).
@@ -81,4 +88,4 @@ Parameters:
 - ***njobs  : int***  
   Maximum number of simultaneous processes.
 - ***chunksize  : int***  
-  Maximum number of molecules each process is charged of.
+  Maximum number of molecules each process is in charge of.

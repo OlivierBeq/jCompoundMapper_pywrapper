@@ -96,6 +96,12 @@ DEFAULT_FP_PARAMETERS = {'DFS': FpParamType(depth=8, dist_cutoff=None, stretch_f
                          }
 
 
+
+Fingerprint = Enum('Fingerprint', [fp_type for fp_type in DEFAULT_FP_PARAMETERS.keys()])
+
+Fingerprints_2D = [fp_type for fp_type in Fingerprint if '3d' not in str(fp_type).lower()]
+Fingerprints_3D = [fp_type for fp_type in Fingerprint if '3d' in str(fp_type).lower()]
+
 class JCompoundMapper:
     """Wrapper to obtain molecular fingerprints from jCompoundMapper.
 
@@ -107,12 +113,9 @@ class JCompoundMapper:
     lock = multiprocessing.RLock()  # Ensure installation of JRE is thread safe
     _jarfile = os.path.abspath(os.path.join(__file__, os.pardir, 'jCompoundMapper', 'jCMapperCLI.jar'))  # Path to the JAR file
 
-    def __init__(self, fingerprint: str = 'DFS', params: Optional[FpParamType] = None, verbose: bool = True):
-        """Instantiate a wrapper to calculate jCompoundMapper molecular fingerprints.
-
-        :param verbose: Should details about the download of the executable be printed out
-        """
-        if not fingerprint in DEFAULT_FP_PARAMETERS.keys():
+    def __init__(self, fingerprint: str | Fingerprint = 'DFS', params: Optional[FpParamType] = None):
+        """Instantiate a wrapper to calculate jCompoundMapper molecular fingerprints."""
+        if not isinstance(fingerprint, Fingerprint) and fingerprint not in DEFAULT_FP_PARAMETERS.keys():
             raise ValueError('fingerprint can only be one of {' + ', '.join(DEFAULT_FP_PARAMETERS.keys()) + '}')
         elif params is not None and not isinstance(params, FpParamType):
             raise ValueError('fingerprint params must be an instance of FpParamType')
@@ -120,7 +123,7 @@ class JCompoundMapper:
         if not os.path.isfile(self._jarfile):
             raise IOError('The required JAR file is not present. Reinstall jcompoundmapper-pywrapper.')
         # Define internal parameters
-        self.fp_name = fingerprint
+        self.fp_name = fingerprint if isinstance(fingerprint, str) else fingerprint.name
         self.fp_params = params
 
     def calculate(self, mols: Iterable[Chem.Mol], nbits: int = 1024, show_banner: bool = True, njobs: int = 1,
