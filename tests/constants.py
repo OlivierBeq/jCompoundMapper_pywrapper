@@ -1,8 +1,28 @@
-# -*- coding: utf-8 -*-
 """Constants for unit tests."""
+
+from pathlib import Path
 
 from rdkit import Chem
 from rdkit.Chem import AllChem
+
+DATA_DIR = Path(__file__).parent / "data"
+
+
+def load_diverse_subset(n: int = 250, with_3d: bool = False) -> list[Chem.Mol]:
+    """Load a slice of the diverse 2000-molecule subset for broader test coverage.
+
+    :param n: number of molecules to load from the front of the subset file
+    :param with_3d: if True, embed a 3D conformer on every molecule (slower)
+    :return: a list of RDKit molecules with explicit hydrogens
+    """
+    with open(DATA_DIR / "diverse_subset_2k.smi") as fh:
+        smiles = [line.strip() for line in fh.readlines()[:n] if line.strip()]
+    mols = [Chem.AddHs(mol) for smi in smiles if (mol := Chem.MolFromSmiles(smi)) is not None]
+    if with_3d:
+        for mol in mols:
+            AllChem.EmbedMolecule(mol, randomSeed=42)
+    return mols
+
 
 MOLECULES = {
     "CHEMBL1560279":
@@ -35,3 +55,6 @@ for key, value in MOLECULES.items():
 # Obtain 3D conformer
 for _, mol in MOLECULES.items():
     AllChem.EmbedMolecule(mol)
+
+# Small slice of the diverse 2000-molecule subset, used for parallelism/broader coverage tests.
+DIVERSE_SUBSET_SMALL = load_diverse_subset(40)
