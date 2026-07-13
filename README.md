@@ -50,7 +50,7 @@ print(jcm.calculate(mols, 2048))
 
 # or
 
-from jCompoundMapper_pywrapper import Fingerprint
+from jcompoundmapper_pywrapper import Fingerprint
 
 jcm = JCompoundMapper(Fingerprint.DFS)
 print(jcm.calculate(mols, 2048))
@@ -61,7 +61,7 @@ print(jcm.calculate(mols, 2048))
 One can specify advanced parameters to the fingerprinter:
 
 ```python
-from jCompoundMapper_pywrapper import DEFAULT_FP_PARAMETERS
+from jcompoundmapper_pywrapper import DEFAULT_FP_PARAMETERS
 
 custom_ecfp_params = DEFAULT_FP_PARAMETERS['ECFP']
 custom_ecfp_params.depth = 6
@@ -72,7 +72,7 @@ print(jcm.calculate(mols))
 ## Documentation
 
 ```python
-def calculate(mols, nbits=1024, show_banner=True, njobs=1, chunksize=1000):
+def calculate(mols, nbits=1024, show_banner=True, njobs=1, chunksize=None):
 ```
 
 Default method to calculate jCompoundMapper fingerprints.
@@ -81,11 +81,12 @@ Parameters:
 
 - ***mols  : Iterable[Chem.Mol]***  
   RDKit molecule objects for which to obtain jCompoundMapper fingerprints.
-- ***nbits  : Union[int, List[int]]***  
+- ***nbits  : int***  
   Size of the fingerprints.
 - ***show_banner  : bool***  
   Displays default notice about jCompoundMapper.
 - ***njobs  : int***  
-  Maximum number of simultaneous processes.
-- ***chunksize  : int***  
-  Maximum number of molecules each process is in charge of.
+  Maximum number of simultaneous processes. Must not exceed the number of available CPU cores.
+- ***chunksize  : int | None***  
+  Maximum number of molecules each process is in charge of. If `None` (default), molecules are
+  automatically split evenly across `njobs` worker processes so every requested worker is used.
