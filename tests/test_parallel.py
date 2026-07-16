@@ -1,11 +1,16 @@
 """Tests for parallel dispatch: chunk sizing, core-count validation, JVM pinning."""
 
+import os
 import unittest
 from unittest.mock import patch
 
 from jcompoundmapper_pywrapper import JCompoundMapper
 from jcompoundmapper_pywrapper.jcompoundmapper import _make_chunks
 from tests.constants import DIVERSE_SUBSET_SMALL
+
+# Some CI runners (e.g. macOS) expose fewer than 4 cores; cap to what's actually available
+# so calculate()'s njobs > cpu_count guard doesn't reject the request.
+NJOBS = max(1, min(4, os.cpu_count() or 1))
 
 
 class TestMakeChunks(unittest.TestCase):
@@ -74,18 +79,18 @@ class TestParallelMatchesSingleProcess(unittest.TestCase):
         mols = DIVERSE_SUBSET_SMALL[:12]
         single = JCompoundMapper("ECFP").calculate(mols, nbits=128, show_banner=False, njobs=1)
         parallel = JCompoundMapper("ECFP").calculate(
-            mols, nbits=128, show_banner=False, njobs=4, chunksize=None
+            mols, nbits=128, show_banner=False, njobs=NJOBS, chunksize=None
         )
         self.assertEqual(single.shape, parallel.shape)
         self.assertTrue((single.values == parallel.values).all())
         self.assertEqual(list(single.dtypes), list(parallel.dtypes))
 
     def test_parallel_uses_all_requested_workers(self):
-        # With 12 molecules and njobs=4, _make_chunks must produce 4 chunks: verified directly
+        # With 12 molecules, _make_chunks must produce NJOBS chunks: verified directly
         # (avoids depending on OS-level process introspection, which is flaky in CI).
         mols = DIVERSE_SUBSET_SMALL[:12]
-        chunks = _make_chunks(mols, njobs=4, chunksize=None)
-        self.assertEqual(len(chunks), 4)
+        chunks = _make_chunks(mols, njobs=NJOBS, chunksize=None)
+        self.assertEqual(len(chunks), NJOBS)
 
 
 if __name__ == "__main__":
